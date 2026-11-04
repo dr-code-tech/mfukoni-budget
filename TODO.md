@@ -18,7 +18,7 @@
 - [x] Push the complete Mfukoni budget application source and build configuration to the user's repository `dr-code-tech/mfukoni-budget`, preserving its existing GitHub history and README while keeping Manus as the canonical project repository.
 
 ## Android release artifact
-- [ ] Provide a signed, installable Android APK as a GitHub Release asset. Configure Android 8.0/API 26 as the minimum and support devices through current Android 17/API 37; verify the built artifact before publishing it.
+- [x] Provide a signed, installable Android APK as a GitHub Release asset. Configure Android 8.0/API 26 as the minimum and support devices through current Android 17/API 37; verify the built artifact before publishing it.
 
 ## Local-first mobile experience
 - [x] All personal financial data persists locally in the browser (and on-device local storage in a native app build), without requiring an account or remote database for budget data.
