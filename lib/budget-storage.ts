@@ -1,10 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
-import { DEFAULT_CATEGORIES, STORAGE_KEY, type BudgetData } from "@/lib/budget-model";
+import { DEFAULT_CATEGORIES, DEFAULT_CURRENCY, normalizeCurrencyCode, STORAGE_KEY, type BudgetData } from "@/lib/budget-model";
 
 export function emptyBudgetData(): BudgetData {
-  return { categories: DEFAULT_CATEGORIES, transactions: [], budgets: [] };
+  return { categories: DEFAULT_CATEGORIES, transactions: [], budgets: [], currency: DEFAULT_CURRENCY };
 }
 
 function isBudgetData(value: unknown): value is BudgetData {
@@ -27,6 +27,7 @@ export async function loadBudgetData(): Promise<BudgetData> {
     return {
       ...parsed,
       categories: parsed.categories.length > 0 ? parsed.categories : DEFAULT_CATEGORIES,
+      currency: normalizeCurrencyCode(parsed.currency),
     };
   } catch {
     return emptyBudgetData();

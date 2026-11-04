@@ -7,11 +7,11 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ActionButton, BrandHeader, PageScroll, PageTitle } from "@/components/budget-ui";
 import { useBudgetStore } from "@/hooks/use-budget-store";
-import { exportCsv, inspectCsv, type CsvImportDraft } from "@/lib/budget-model";
+import { APP_CURRENCIES, exportCsv, formatCurrency, inspectCsv, type CsvImportDraft } from "@/lib/budget-model";
 import { palette, typeface } from "@/lib/budget-theme";
 
 export default function DataScreen() {
-  const { data, importDraft } = useBudgetStore();
+  const { data, currency, importDraft, setCurrency } = useBudgetStore();
   const [draft, setDraft] = useState<CsvImportDraft | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -98,6 +98,30 @@ export default function DataScreen() {
 
       <View style={styles.actionCard}>
         <View style={styles.cardIntro}>
+          <View style={[styles.cardIcon, { backgroundColor: "#203149" }]}><Ionicons name="cash-outline" size={18} color={palette.blue} /></View>
+          <View style={styles.cardCopy}><Text style={styles.cardTitle}>Currency</Text><Text style={styles.cardDescription}>Default currency starts in East Africa. Choose yours anytime.</Text></View>
+        </View>
+        <View style={styles.currencyRow}>
+          {APP_CURRENCIES.map((code) => {
+            const selected = code === currency;
+            return (
+              <Pressable
+                key={code}
+                accessibilityRole="button"
+                accessibilityLabel={`Select ${code} currency`}
+                onPress={() => setCurrency(code)}
+                style={({ pressed }) => [styles.currencyPill, selected && styles.currencyPillActive, pressed && styles.currencyPillPressed]}
+              >
+                <Text style={[styles.currencyPillText, selected && styles.currencyPillTextActive]}>{code}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={styles.currencySummary}>Showing totals as {formatCurrency(data.transactions.reduce((sum, item) => sum + (item.type === "income" ? item.amount : -item.amount), 0), currency)}</Text>
+      </View>
+
+      <View style={styles.actionCard}>
+        <View style={styles.cardIntro}>
           <View style={styles.cardIcon}><Ionicons name="download-outline" size={18} color={palette.mint} /></View>
           <View style={styles.cardCopy}><Text style={styles.cardTitle}>Bring in a CSV</Text><Text style={styles.cardDescription}>Review valid rows and errors before importing.</Text></View>
         </View>
@@ -156,6 +180,13 @@ const styles = StyleSheet.create({
   cardCopy: { flex: 1, gap: 4 },
   cardTitle: { color: palette.text, fontFamily: typeface.semibold, fontSize: 14 },
   cardDescription: { color: palette.muted, fontFamily: typeface.regular, fontSize: 11, lineHeight: 16 },
+  currencyRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  currencyPill: { borderRadius: 999, borderWidth: 1, borderColor: palette.line, backgroundColor: palette.background, paddingHorizontal: 12, paddingVertical: 8 },
+  currencyPillActive: { backgroundColor: palette.mintWash, borderColor: palette.mint },
+  currencyPillPressed: { opacity: 0.8 },
+  currencyPillText: { color: palette.muted, fontFamily: typeface.semibold, fontSize: 11 },
+  currencyPillTextActive: { color: palette.mint },
+  currencySummary: { color: palette.dim, fontFamily: typeface.medium, fontSize: 10 },
   preview: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.line, borderRadius: 15, padding: 12, gap: 10 },
   previewHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   previewTitle: { color: palette.text, fontFamily: typeface.semibold, fontSize: 13 },

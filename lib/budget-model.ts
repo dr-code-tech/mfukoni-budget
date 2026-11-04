@@ -25,10 +25,14 @@ export type Budget = {
   amount: number;
 };
 
+export const DEFAULT_CURRENCY = "KES";
+export const APP_CURRENCIES = ["KES", "UGX", "TZS", "RWF", "BIF", "USD", "EUR"] as const;
+
 export type BudgetData = {
   categories: Category[];
   transactions: Transaction[];
   budgets: Budget[];
+  currency?: string;
 };
 
 export type TransactionInput = Omit<Transaction, "id">;
@@ -126,12 +130,35 @@ export function formatShortMonth(month: string): string {
   );
 }
 
-export function formatCurrency(value: number): string {
+let activeCurrencyCode = DEFAULT_CURRENCY;
+
+export function normalizeCurrencyCode(currency?: string): string {
+  if (!currency) return DEFAULT_CURRENCY;
+  const trimmed = currency.toUpperCase();
+  return APP_CURRENCIES.includes(trimmed as (typeof APP_CURRENCIES)[number]) ? trimmed : DEFAULT_CURRENCY;
+}
+
+export function setCurrencyCode(currency?: string): string {
+  const next = normalizeCurrencyCode(currency);
+  activeCurrencyCode = next;
+  return next;
+}
+
+export function getCurrencyCode(): string {
+  return activeCurrencyCode;
+}
+
+export function formatCurrency(value: number, currencyCode = getCurrencyCode()): string {
+  const normalized = normalizeCurrencyCode(currencyCode);
+  const zeroDecimalCurrencies = new Set(["KES", "UGX", "TZS", "RWF", "BIF"]);
+  const minimumFractionDigits = zeroDecimalCurrencies.has(normalized) ? 0 : 2;
+  const maximumFractionDigits = zeroDecimalCurrencies.has(normalized) ? 0 : 2;
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 0,
+    currency: normalized,
+    minimumFractionDigits,
+    maximumFractionDigits,
   }).format(Number.isFinite(value) ? value : 0);
 }
 

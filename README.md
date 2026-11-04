@@ -7,6 +7,7 @@ An offline-first personal budget app built with Expo, React Native, and TypeScri
 - Record, edit, and remove income and expense transactions with dates, categories, and optional descriptions.
 - Set monthly spending limits by expense category and see spent and remaining amounts.
 - Review a monthly dashboard with category spending, a month-over-month trend, and budget insights.
+- Switch the app currency from a built-in East Africa set (default: KES) or choose another supported code like USD, EUR, UGX, TZS, RWF, or BIF.
 - Import and export transactions and budgets as CSV.
 
 ## Data and privacy
@@ -29,6 +30,8 @@ pnpm check
 pnpm lint
 pnpm exec vitest run tests/budget-model.test.ts
 ```
+
+To change the app's display currency, open the Data tab and pick a supported currency from the selector. The app starts with an East Africa default (KES) and saves your choice locally so it persists for later sessions.
 
 The app's budget functionality is client-side. The bundled API server comes from the managed Expo starter and is not the storage location for budget records.
 

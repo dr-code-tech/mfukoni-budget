@@ -4,7 +4,10 @@ import { ActivityIndicator, Text, View } from "react-native";
 import {
   CATEGORY_PALETTE,
   currentMonthKey,
+  DEFAULT_CURRENCY,
   makeId,
+  normalizeCurrencyCode,
+  setCurrencyCode,
   type Budget,
   type BudgetData,
   type Category,
@@ -18,9 +21,11 @@ import { palette, typeface } from "@/lib/budget-theme";
 
 type BudgetStoreValue = {
   data: BudgetData;
+  currency: string;
   selectedMonth: string;
   hydrated: boolean;
   setSelectedMonth: (month: string) => void;
+  setCurrency: (currency: string) => void;
   addTransaction: (input: TransactionInput) => Transaction;
   updateTransaction: (id: string, input: TransactionInput) => void;
   removeTransaction: (id: string) => void;
@@ -35,12 +40,15 @@ export function BudgetStoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<BudgetData>(emptyBudgetData);
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
   const [hydrated, setHydrated] = useState(false);
+  const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
 
   useEffect(() => {
     let active = true;
     void loadBudgetData().then((saved) => {
       if (!active) return;
       setData(saved);
+      setCurrencyState(normalizeCurrencyCode(saved.currency));
+      setCurrencyCode(saved.currency);
       setHydrated(true);
     });
     return () => {
@@ -51,6 +59,19 @@ export function BudgetStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hydrated) void saveBudgetData(data).catch(() => undefined);
   }, [data, hydrated]);
+
+  useEffect(() => {
+    const nextCurrency = normalizeCurrencyCode(data.currency ?? currency);
+    setCurrencyState(nextCurrency);
+    setCurrencyCode(nextCurrency);
+  }, [data, currency]);
+
+  const setCurrency = useCallback((nextCurrency: string) => {
+    const normalized = normalizeCurrencyCode(nextCurrency);
+    setCurrencyState(normalized);
+    setCurrencyCode(normalized);
+    setData((current) => ({ ...current, currency: normalized }));
+  }, []);
 
   const addTransaction = useCallback((input: TransactionInput) => {
     const transaction: Transaction = { ...input, id: makeId() };
@@ -166,9 +187,11 @@ export function BudgetStoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<BudgetStoreValue>(
     () => ({
       data,
+      currency,
       selectedMonth,
       hydrated,
       setSelectedMonth,
+      setCurrency,
       addTransaction,
       updateTransaction,
       removeTransaction,
@@ -178,8 +201,10 @@ export function BudgetStoreProvider({ children }: { children: ReactNode }) {
     }),
     [
       data,
+      currency,
       selectedMonth,
       hydrated,
+      setCurrency,
       addTransaction,
       updateTransaction,
       removeTransaction,
